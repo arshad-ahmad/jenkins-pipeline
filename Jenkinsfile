@@ -16,7 +16,7 @@ pipeline {
 	    stage('Build image') {
 		    steps {
 			    script {
-				    app = docker.build("arshad1914/pipeline:latest")
+				    app = docker.build("arshad1914/pipeline:${env.BUILD_ID}")
 		    	    }
 		    }
 	    }
@@ -27,7 +27,7 @@ pipeline {
 				    withCredentials([string(credentialsId: 'dockerhub', variable: 'dockerhub')]) {
 					    sh "docker login -u arshad1914 -p ${dockerhub}"
 				    }
-						     app.push("latest")
+				    app.push("${env.BUILD_ID")
 			     }
 							     
 		    }
@@ -36,7 +36,7 @@ pipeline {
 	    stage('Deploy to K8s') {
 		    steps{
 			    echo "Deployment started ..."
-			    sh "sed -i 's/pipeline:latest/g' deployment.yaml"
+			    sh "sed -i 's/pipeline:latest/pipeline:${env.BUILD_ID}/g' deployment.yaml"
 			    step([$class: 'KubernetesEngineBuilder', projectId: env.PROJECT_ID, clusterName: env.CLUSTER_NAME, location: env.LOCATION, manifestPattern: 'deployment.yaml', credentialsId: env.CREDENTIALS_ID, verifyDeployments: true])
 	    		}
         	}
