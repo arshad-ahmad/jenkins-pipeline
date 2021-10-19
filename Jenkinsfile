@@ -24,7 +24,7 @@ pipeline {
 	    stage('Push image') {
 		    steps {
 			    script {
-				    docker.withRegistry('https://registry.hub.docker.com', 'arshad1914') {
+				    docker.withRegistry('', registryCredential ) {
 					    app.push()
 					    app.push("latest")
 				    }
