@@ -4,7 +4,7 @@ pipeline {
 		PROJECT_ID = 'striped-bastion-329118'
                 CLUSTER_NAME = 'cluster-1'
                 LOCATION = 'us-central1-c'
-                CREDENTIALS_ID = 'kubernetes'		
+                CREDENTIALS_ID = 'kubernetes'
 	}
 	
     stages {
@@ -24,7 +24,8 @@ pipeline {
 	    stage('Push image') {
 		    steps {
 			    script {
-				    docker.withRegistry('', registryCredential ) {
+				    withCredentials([string(credentialsId: 'dockerhub', variable: 'dockerhub') {
+					    sh "docker login -u arshad1914 -p ${dockerhub}"
 					    app.push()
 					    app.push("latest")
 				    }
