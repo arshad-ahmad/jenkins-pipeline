@@ -26,7 +26,7 @@ pipeline {
 			    script {
 				    docker.withRegistry('https://registry.hub.docker.com', 'arshad1914') {
 					    app.push()
-					    app.push('latest")
+					    app.push("latest")
 				    }
 			    }
 		    }
