@@ -12,6 +12,7 @@ pipeline {
 		    steps {
 			    checkout scm
 		    }
+	    }
 	    stage('Build') {
 		    steps {
 			    script {
@@ -26,6 +27,8 @@ pipeline {
 				    docker.withRegistry('https://registry.hub.docker.com', 'arshad1914') {
 					    app.push('latest')
 					    app.push("${env.BUILD_ID}")
+				    }
+			    }
 		    }
 	    }
 	    
@@ -43,11 +46,9 @@ pipeline {
 			    echo "Deployment started ..."
 			    sh 'ls -ltr'
 			    sh 'pwd'
-        stage('Deploy to GKE') {
-            steps{
-                sh "sed -i 's/pipeline:latest/pipeline:${env.BUILD_ID}/g' deployment.yaml"
-                step([$class: 'KubernetesEngineBuilder', projectID: env.PROJECT_ID, clusterName: env.CLUSTER_NAME, location: env.LOCATION, manifestPattern: 'deployment.yaml', credentialsId: env.CREDENTIALS_ID, verifyDeployments: true])
-            }
-        }
-    }    
+			    sh "sed -i 's/pipeline:latest/pipeline:${env.BUILD_ID}/g' deployment.yaml"
+			    step([$class: 'KubernetesEngineBuilder', projectID: env.PROJECT_ID, clusterName: env.CLUSTER_NAME, location: env.LOCATION, manifestPattern: 'deployment.yaml', credentialsId: env.CREDENTIALS_ID, verifyDeployments: true])
+	    		}
+        	}
+    	}    
 }
