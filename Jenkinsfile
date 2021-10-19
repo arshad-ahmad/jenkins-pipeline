@@ -16,7 +16,7 @@ pipeline {
 	    stage('Build image') {
 		    steps {
 			    script {
-				    app = docker.build("arshad1914/pipeline:${env.BUILD_ID}")
+				    app = docker.build("arshad1914/pipeline:latest")
 		    	    }
 		    }
 	    }
@@ -25,8 +25,8 @@ pipeline {
 		    steps {
 			    script {
 				    docker.withRegistry('https://registry.hub.docker.com', 'arshad1914') {
-					    app.push('latest')
-					    app.push("${env.BUILD_ID}")
+					    app.push()
+					    app.push('latest")
 				    }
 			    }
 		    }
