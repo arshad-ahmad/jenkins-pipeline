@@ -27,7 +27,6 @@ pipeline {
 				    withCredentials([string(credentialsId: 'dockerhub', variable: 'dockerhub') {
 					    sh "docker login -u arshad1914 -p ${dockerhub}"
 				    }
-					    app.push()
 					    app.push("latest")
 			     }
 							     
