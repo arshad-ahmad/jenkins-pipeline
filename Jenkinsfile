@@ -1,18 +1,18 @@
 pipeline {
     agent any
 	      tools {
-		            maven 'Maven'
+		     maven 'Maven'
 	      }
 	
 	      environment {
-		            PROJECT_ID = 'striped-bastion-329118'
+		PROJECT_ID = 'striped-bastion-329118'
                 CLUSTER_NAME = 'cluster-1'
                 LOCATION = 'us-central1-c'
                 CREDENTIALS_ID = 'kubernetes'		
 	      }
 	
     stages {
-	          stage('Scm Checkout') {
+	     stage('Scm Checkout') {
 		                steps {
 			                      checkout scm
 		                }
