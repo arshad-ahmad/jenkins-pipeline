@@ -13,7 +13,7 @@ pipeline {
 			    checkout scm
 		    }
 	    }
-	    stage('Build') {
+	    stage('Build image') {
 		    steps {
 			    script {
 				    app = docker.build("arshad1914/pipeline:${env.BUILD_ID}")
@@ -23,7 +23,7 @@ pipeline {
 	    
 	    stage('Push image') {
 		    steps {
-			    scrip {
+			    script {
 				    docker.withRegistry('https://registry.hub.docker.com', 'arshad1914') {
 					    app.push('latest')
 					    app.push("${env.BUILD_ID}")
@@ -31,16 +31,7 @@ pipeline {
 			    }
 		    }
 	    }
-	    
-	    stage('Build Docker Image') {
-		    steps {
-			    sh 'whoami'
-			    script {
-				    myimage = docker.build("arshad1914/pipeline:${env.BUILD_ID}")
-			    }
-		    }
-	    }
-	    
+	 
 	    stage('Deploy to K8s') {
 		    steps{
 			    echo "Deployment started ..."
