@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    service: web
+  name: web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service: web
+  template:
+    metadata:
+      labels:
+        service: web
+    spec:
+      containers:
+        - args:
+            - bash
+            - -c
+            - python manage.py syncdb --noinput && python manage.py migrate && python manage.py runserver 0.0.0.0:5000
+          image: arshad1914/django_notejam
+          name: notejam
+          ports:
+            - containerPort: 5000
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 250Mi
+      restartPolicy: Always
