@@ -1,9 +1,5 @@
 pipeline {
     agent any
-	tools {
-		maven 'Maven'
-	}
-	
 	environment {
 		PROJECT_ID = 'striped-bastion-329118'
                 CLUSTER_NAME = 'cluster-1'
@@ -12,22 +8,24 @@ pipeline {
 	}
 	
     stages {
-	    stage('Scm Checkout') {
+	    stage('Checkout code') {
 		    steps {
 			    checkout scm
 		    }
-	    }
-	    
 	    stage('Build') {
 		    steps {
-			    sh 'mvn clean package'
+			    script {
+				    app = docker.build("arshad1914/pipeline:${env.BUILD_ID}")
+		    	    }
 		    }
 	    }
 	    
-	    stage('Test') {
+	    stage('Push image') {
 		    steps {
-			    echo "Testing..."
-			    sh 'mvn test'
+			    scrip {
+				    docker.withRegistry('https://registry.hub.docker.com', 'arshad1914') {
+					    app.push('latest')
+					    app.push("${env.BUILD_ID}")
 		    }
 	    }
 	    
@@ -40,32 +38,16 @@ pipeline {
 		    }
 	    }
 	    
-	    stage("Push Docker Image") {
-		    steps {
-			    script {
-				    echo "Push Docker Image"
-				    withCredentials([string(credentialsId: 'dockerhub', variable: 'dockerhub')]) {
-            				sh "docker login -u arshad1914 -p ${dockerhub}"
-				    }
-				        myimage.push("${env.BUILD_ID}")
-				    
-			    }
-		    }
-	    }
-	    
 	    stage('Deploy to K8s') {
 		    steps{
 			    echo "Deployment started ..."
 			    sh 'ls -ltr'
 			    sh 'pwd'
-			    sh "sed -i 's/tagversion/${env.BUILD_ID}/g' serviceLB.yaml"
-				sh "sed -i 's/tagversion/${env.BUILD_ID}/g' deployment.yaml"
-			    echo "Start deployment of serviceLB.yaml"
-			    step([$class: 'KubernetesEngineBuilder', projectId: env.PROJECT_ID, clusterName: env.CLUSTER_NAME, location: env.LOCATION, manifestPattern: 'serviceLB.yaml', credentialsId: env.CREDENTIALS_ID, verifyDeployments: true])
-				echo "Start deployment of deployment.yaml"
-				step([$class: 'KubernetesEngineBuilder', projectId: env.PROJECT_ID, clusterName: env.CLUSTER_NAME, location: env.LOCATION, manifestPattern: 'deployment.yaml', credentialsId: env.CREDENTIALS_ID, verifyDeployments: true])
-			    echo "Deployment Finished ..."
-		    }
-	    }
-    }
+        stage('Deploy to GKE') {
+            steps{
+                sh "sed -i 's/pipeline:latest/pipeline:${env.BUILD_ID}/g' deployment.yaml"
+                step([$class: 'KubernetesEngineBuilder', projectID: env.PROJECT_ID, clusterName: env.CLUSTER_NAME, location: env.LOCATION, manifestPattern: 'deployment.yaml', credentialsId: env.CREDENTIALS_ID, verifyDeployments: true])
+            }
+        }
+    }    
 }
